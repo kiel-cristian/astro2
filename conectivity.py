@@ -22,6 +22,26 @@ class Matrix:
           row.append( self.no_search_key )
       self.matrix.append(row)
 
+  def __set_control_vars__(self, j, i):
+    #Temporal global variables
+    ##
+    self.xcm = i
+    self.ycm = j
+    ###
+    self.minx = i
+    self.miny= j
+    ###
+    self.maxx = i
+    self.maxy= j
+    ###
+    self.rx= 0
+    self.ry= 0
+
+    self.points = 0
+
+  def valid_point(self,j,i):
+    return j >= 0 and j < self.n and i >= 0 and i < self.n
+
   def more_stars(self, i, j):
     if( self.matrix[j][i+1] == self.search_key or \
         self.matrix[j+1][i] == self.search_key or \
@@ -30,10 +50,19 @@ class Matrix:
         self.matrix[j+1][i+1] == self.search_key or \
         self.matrix[j+1][i-1] == self.search_key or \
         self.matrix[j-1][i+1] == self.search_key or \
-        self.matrix[j-1][i-1] == self.search_key) and self.matrix[j][i] == self.search_key:
+        self.matrix[j-1][i-1] == self.search_key):
       return True
     else:
       return False
+
+  def has_a_star(self, j, i):
+    if self.valid_point( j, i ):
+      return self.matrix[j][i] == self.search_key
+    else:
+      return False
+
+  def can_expand(self):
+    return self.ycm >= 0 and self.xcm >=0 and self.xcm < self.n and self.ycm < self.n and self.rx < self.delta and self.ry < self.delta
 
   def connect(self):
     for j in range(1,self.n-1):
@@ -41,93 +70,86 @@ class Matrix:
         self.connect_point( j, i)
 
   def connect_point(self, j, i):
-    if j < 0 or i < 0:
-      return
+    self.__set_control_vars__( j, i)
 
-    xcm = i
-    ycm = j
+    while self.more_stars( i = self.xcm, j = self.ycm) and self.can_expand():
+      print("xcm: " + str(self.xcm))
+      print("ycm: " + str(self.ycm))
 
-    control_i = i
-    control_j = j
+      for dj in range(-1,2):
+        cj = self.ycm+dj
+        for di in range(-1,2):
+          ci = self.xcm+di
 
-    minx = i
-    miny= j
+          if self.can_expand():
+            if self.has_a_star( j = cj, i = ci):
+              self.union( cj, ci)
 
-    maxx = i
-    maxy= j
+      self.print_m()
 
-    rx= 0
-    ry= 0
+  def union(self, cj, ci):
+    self.points += 1
 
-    points = 0
-    end = False
+    if ci < self.minx:
+      self.minx = ci
+    if ci > self.maxx:
+      self.maxx = ci
 
-    it_j = 1
-    it_i = 1
+    if cj < self.miny:
+      self.miny = cj
+    if cj > self.maxy:
+      self.maxy = cj
 
-    while self.more_stars( control_i,control_j):
-      if self.matrix[control_j-it_j][control_i] == self.search_key:
-        if self.union( points, minx, maxx, miny, maxy, rx, ry, xcm, ycm, control_j-it_j, control_i, control_i, control_j, i , j):
-          continue
+    self.rx =  self.maxx - self.minx
+    self.ry = self.maxy - self.miny
 
-      if self.matrix[control_j][control_i] == self.search_key:
-        if self.union( points, minx, maxx, miny, maxy, rx, ry, xcm, ycm, control_j, control_i, control_i, control_j, i , j):
-          continue
+    self.move_mass_center( cj= cj, ci= ci)
 
-      if self.matrix[control_j+it_j][control_i] == self.search_key:
-        if self.union( points, minx, maxx, miny, maxy, rx, ry, xcm, ycm, control_j+it_j, control_i, control_i, control_j, i , j):
-          continue
+  def move_mass_center(self, cj, ci):
+    new_xcm = (self.xcm*(self.points - 1) + (ci))/(self.points)
+    new_ycm = (self.ycm*(self.points - 1) + (cj))/(self.points)
 
-      if self.matrix[control_j][control_i-it_i] == self.search_key:
-        if self.union( points, minx, maxx, miny, maxy, rx, ry, xcm, ycm, control_j, control_i-it_i, control_i, control_j, i , j):
-          continue
+    if self.valid_point( j=new_ycm, i=new_xcm):
 
-      if self.matrix[control_j][control_i+it_i] == self.search_key:
-        if self.union( points, minx, maxx, miny, maxy, rx, ry, xcm, ycm, control_j, control_i+it_i, control_i, control_j, i , j):
-          continue
-
-  def union(self, points, minx, maxx, miny, maxy, rx, ry, xcm, ycm, cj, ci, control_i, control_j, i , j):
-    if self.matrix[cj][ci] == self.search_key:
       self.matrix[cj][ci] = self.marker_key
-      points += 1
+      self.matrix[self.ycm][self.xcm] = self.marker_key
 
-      if ci < minx:
-        minx = ci
-      if ci > maxx:
-        maxx = ci
+      dx = self.xcm - new_xcm
+      dy = self.ycm - new_ycm
 
-      if cj < miny:
-        miny = cj
-      if cj > maxy:
-        maxy = cj
-
-      rx =  maxx - minx
-      ry = maxy - miny
-
-      xcm = (xcm*(points - 1) + (ci))/(points)
-      ycm = (ycm*(points - 1) + (control_j + j))/(points)
-
-      control_j = int(ycm)
-      control_i = int(xcm)
-
-      if ycm < 0 or xcm <0 or xcm >= self.n or ycm >= self.n or rx >= self.delta or ry >= self.delta:
-        return True
+      if self.xcm == new_xcm:
+        print("xcm no vario en :" + str(new_xcm))
       else:
-        self.matrix[control_j][control_i] = self.search_key
-        return True
-    else:
-      return False
+        print("cambiando xcm a:" + str(new_xcm))
+
+      # if self.ycm == new_ycm:
+      #   print("ycm no vario en :" + str(new_ycm))
+      # else:
+      #   print("cambiando ycm a:" + str(new_ycm))
+
+      self.xcm = new_xcm
+      self.ycm = new_ycm
+
+      ###
+      self.minx += dx
+      self.miny += dy
+      ###
+      self.maxx += dx
+      self.maxy += dy
+      ###
+
+      self.matrix[self.ycm][self.xcm] = self.search_key
 
   def print_m(self):
     p = ""
     for j in range(0,self.n):
       for i in range(0,self.n):
-        p += "" + str( self.matrix[j][i])
+        p += "  " + str( self.matrix[j][i])
       p += "\n"
     print(p)
 
 def run():
-  n = 20
+  n = 10
   delta = 3
   matrix = Matrix( n= n, delta= delta)
 
