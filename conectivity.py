@@ -18,11 +18,14 @@ class Matrix:
     self.N = N
     self.matrix = []
     self.matrix_list = []
+    self.matrix_copy = []
 
     if matrix == None:
       self.__init_matrix__()
     else:
-      self.matrix = matrix[:] #copy matrix
+      self.matrix = matrix[:] #copy editable inner matrix
+
+    self.matrix_copy = matrix[:] #backup matrix
 
 
   def __init_matrix__(self):
@@ -35,7 +38,6 @@ class Matrix:
           row.append( self.no_search_key )
         self.matrix_list.append([j,i])
       self.matrix.append(row)
-      self.matrix_copy = self.matrix[:]
 
   def __set_control_vars__(self, j, i):
     #Temporal global variables

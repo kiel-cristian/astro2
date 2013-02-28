@@ -11,8 +11,8 @@ if __file__:
 else:
   debug = False
 
-maxROW = 1000
-maxCOL = 1000
+maxROW = 4096
+maxCOL = 4096
 
 hdulist = pf.open('newimage2.fits')
 hdu= hdulist[0].data

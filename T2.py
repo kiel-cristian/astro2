@@ -23,7 +23,7 @@ def FindFDR(hdu,sigma_noise,fdr,N,psf):
 	M = vmatrizDeteciones(hdu,pos_sources)
 
 	# conectividad
-	M = Matrix( n = maxROW, N = N, delta = psf, matrix = M).connect()
+	M2 = Matrix( n = maxROW, N = N, delta = psf, matrix = M).connect()
 
 	#esto genera los vectores ra y dec que se piden,
 	#pero creo tiene que ser con los objetos detectados despues de la conectividad no estoy seguro,
