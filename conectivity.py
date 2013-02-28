@@ -38,6 +38,8 @@ class Matrix:
     self.ry= 0
 
     self.points = 0
+    self.union_points = []
+    self.next_point = False
 
   def valid_point(self,j,i):
     return j >= 0 and j < self.n and i >= 0 and i < self.n
@@ -70,11 +72,15 @@ class Matrix:
         self.connect_point( j, i)
 
   def connect_point(self, j, i):
+    if self.matrix[j][i] == self.no_search_key:
+      return
+
     self.__set_control_vars__( j, i)
 
-    while self.more_stars( i = self.xcm, j = self.ycm) and self.can_expand():
+    while self.more_stars( i = self.xcm , j = self.ycm ) and self.can_expand() and self.valid_point( self.xcm, self.ycm ) and not self.next_point:
       print("xcm: " + str(self.xcm))
       print("ycm: " + str(self.ycm))
+      print("valor:" + str(self.matrix[self.ycm][self.xcm]))
 
       for dj in range(-1,2):
         cj = self.ycm+dj
@@ -85,11 +91,13 @@ class Matrix:
             if self.has_a_star( j = cj, i = ci):
               self.union( cj, ci)
 
+      self.unify_points()
+
+      self.matrix[j][i] = '*'
       self.print_m()
 
   def union(self, cj, ci):
     self.points += 1
-
     if ci < self.minx:
       self.minx = ci
     if ci > self.maxx:
@@ -103,24 +111,31 @@ class Matrix:
     self.rx =  self.maxx - self.minx
     self.ry = self.maxy - self.miny
 
-    self.move_mass_center( cj= cj, ci= ci)
+    self.matrix[cj][ci] = self.marker_key # delete the united point
+    self.union_points.append([cj,ci])
 
-  def move_mass_center(self, cj, ci):
-    new_xcm = (self.xcm*(self.points - 1) + (ci))/(self.points)
-    new_ycm = (self.ycm*(self.points - 1) + (cj))/(self.points)
+  def unify_points(self):
+    print("Unifying points")
 
-    if self.valid_point( j=new_ycm, i=new_xcm):
+    xcm = 0
+    ycm = 0
 
-      self.matrix[cj][ci] = self.marker_key
-      self.matrix[self.ycm][self.xcm] = self.marker_key
+    for point in self.union_points:
+      ycm += point[0] #y
+      xcm += point[1] #x
 
-      dx = self.xcm - new_xcm
-      dy = self.ycm - new_ycm
+    xcm = int( (xcm - 1) / self.points)
+    ycm = int( (ycm -1) / self.points)
 
-      if self.xcm == new_xcm:
-        print("xcm no vario en :" + str(new_xcm))
-      else:
-        print("cambiando xcm a:" + str(new_xcm))
+    self.move_mass_center(new_ycm = ycm, new_xcm = xcm)
+
+  def move_mass_center(self, new_ycm, new_xcm):
+    dx = self.xcm - new_xcm
+    dy = self.ycm - new_ycm
+
+    if self.xcm == new_xcm and self.ycm == new_ycm:
+      self.next_point = True
+      print("xcm e ycm no vario en :" + str(new_xcm) + ", " + str(new_ycm))
 
       # if self.ycm == new_ycm:
       #   print("ycm no vario en :" + str(new_ycm))
@@ -138,7 +153,7 @@ class Matrix:
       self.maxy += dy
       ###
 
-      self.matrix[self.ycm][self.xcm] = self.search_key
+    self.matrix[self.ycm][self.xcm] = self.search_key
 
   def print_m(self):
     p = ""
