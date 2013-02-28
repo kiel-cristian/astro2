@@ -25,7 +25,7 @@ class Matrix:
     else:
       self.matrix = matrix[:] #copy editable inner matrix
 
-    self.matrix_copy = matrix[:] #backup matrix
+    self.matrix_copy = self.matrix[:] #backup matrix
 
 
   def __init_matrix__(self):
