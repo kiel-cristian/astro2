@@ -1,5 +1,6 @@
-import random as r
+from random import randint
 from math import sqrt
+from numpy import *
 
 if __file__:
   debug = True
@@ -28,12 +29,13 @@ class Matrix:
     for i in range(0,self.n):
       row = []
       for j in range(0,self.n):
-        if r.randint(0,1) == 1:
+        if randint(0,1) == 1:
           row.append( self.search_key )
         else:
           row.append( self.no_search_key )
         self.matrix_list.append([j,i])
       self.matrix.append(row)
+      self.matrix_copy = self.matrix[:]
 
   def __set_control_vars__(self, j, i):
     #Temporal global variables
@@ -80,10 +82,12 @@ class Matrix:
       return self.has_a_star( j, i) and self.valid_point( j, i) and self.r < self.delta and self.points <= self.N
 
   def connect(self):
+    self.matrix = self.matrix_copy
+
     # Randomized version
     # l = self.matrix_list[:] #copy list
     # while len(l) > 0:
-    #   index = r.randint(0,len(l)-1)
+    #   index = randint(0,len(l)-1)
     #   j = l[index][0]
     #   i = l[index][1]
     #   self.connect_point(j,i)
@@ -98,9 +102,10 @@ class Matrix:
       for j in range(0,self.n):
         for i in range(0,self.n):
           self.clean_marker( j, i)
+    return self.matrix
 
   def clean_marker(self,j,i):
-    if self.matrix[j][i] == self.star_marker:
+    if self.matrix[j][i] == self.star_marker or self.matrix[j][i] == self.marker_key:
       self.matrix[j][i] = self.search_key
 
   def connect_point(self, j, i):
@@ -116,10 +121,10 @@ class Matrix:
 
       # Randomized implementation
       # dirs = []
-      # d = r.randint(0,3)
+      # d = randint(0,3)
       # dirs += [d]
       # while len(dirs) < 4:
-      #   d = r.randint(0,3)
+      #   d = randint(0,3)
       #   if not(d in dirs):
       #     dirs += [d]
 
@@ -152,7 +157,7 @@ class Matrix:
 
       self.rx =  self.maxx - self.minx
       self.ry = self.maxy - self.miny
-      self.r = sqrt(self.rx**2 + self.ry**2)
+      self.r = sqrt(self.rx**2 + self.ry**2)/2
 
       self.matrix[cj][ci] = self.marker_key # mark the united point
       self.union_points.append([cj,ci])
@@ -161,7 +166,7 @@ class Matrix:
       return False
 
   def unify_points(self):
-    if self.points > 0:
+    if self.points >= self.N:
       xcm = 0
       ycm = 0
 
@@ -181,6 +186,14 @@ class Matrix:
       self.ycm = ycm
 
       self.matrix[self.ycm][self.xcm] = self.star_marker
+    # points < N
+    else:
+      for point in self.union_points:
+        y = point[0]
+        x = point[1]
+
+        self.matrix[y][x] = self.marker_key #delete the united point
+      self.matrix[self.ycm][self.xcm] = self.search_key
 
   def print_m(self):
     p = ""
@@ -191,15 +204,15 @@ class Matrix:
     print(p)
 
 def run():
-  n = 1000
+  n = 40
   delta = 3
   N = 4
 
   matrix = Matrix( n = n, N = N, delta = delta)
 
-  # matrix.print_m()
+  matrix.print_m()
   matrix.connect()
-  # matrix.print_m()
+  matrix.print_m()
 
 if debug:
   run()

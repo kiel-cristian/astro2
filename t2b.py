@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 import pyfits as pf
 import pylab as pl
 import scipy as sp
@@ -6,9 +6,14 @@ import numpy as np
 from math import *
 from scipy import random
 
+if __file__:
+  debug = True
+else:
+  debug = False
 
-maxROW = 4096
-maxCOL = 4096
+maxROW = 1000
+maxCOL = 1000
+
 hdulist = pf.open('newimage2.fits')
 hdu= hdulist[0].data
 h=hdu.ravel()
@@ -51,11 +56,10 @@ def get_p_value(value_list,stdev,mean):
 			if x >= value_list[i]:
 				pval[i] += dint
 		x += eps
-	
+
 	return pval
 
-def FDR_method(data,alpha,mean2,stdev2): 
-	
+def FDR_method(data,alpha,mean2,stdev2):
 	N = len(data)
 	pvals = get_p_value(data,stdev2,mean2)
 
@@ -81,7 +85,8 @@ def FDR_method(data,alpha,mean2,stdev2):
 
 	pval_c = pvals_and_pos[indx][0]
 
-	print pval_c
+	if debug:
+		print pval_c
 
 	source_pos = []
 	for i in range(N):
@@ -99,7 +104,7 @@ def matrizDeteciones(data,pos_sources):
 	for i in range(len(pos_sources)):
 		detecciones[pos_sources[i]]=1
 
-	detecciones2=detecciones.reshape(4096,-1)
+	detecciones2=detecciones.reshape(maxROW,-1)
 	return detecciones2
 
 def getRaDec(detecciones3):
@@ -107,9 +112,9 @@ def getRaDec(detecciones3):
 	RA=[]
 	DEC=[]
 
-	for i in range(4096):
-		for j in range(4096):
-			if detecciones3[i][j] == 1:
+	for i in range(maxROW):
+		for j in range(maxCOL):
+			if detecciones3[i][j] == 1: #modificar por el radio de la psf y no pixel exacto
 				RA.append(getRa(i,j))
 				DEC.append(getDec(i,j))
 	return (RA,DEC)
@@ -121,7 +126,7 @@ def RADECtoRowCol(RA,DEC):
 
 def addStar2(hdu, RA, DEC):
 	(ROW,COL) = RADECtoRowCol(RA,DEC)
-	if 0 <= ROW < maxROW and 0 <= COL < maxCOL:	
+	if 0 <= ROW < maxROW and 0 <= COL < maxCOL:
 		hdu[ROW,COL] =1
 	return
 
@@ -136,7 +141,7 @@ def addStellarCatalog2(hdu, catalog):
 
 def addGalaxy2(hdu, m, RA, DEC, n, Re, el, theta):
 	(ROW,COL)=RADECtoRowCol(RA,DEC)
-	if 0 <= ROW < maxROW and 0 <= COL < maxCOL:	
+	if 0 <= ROW < maxROW and 0 <= COL < maxCOL:
 		a1=int(ROW-5*Re)
 		b1=int(ROW+5*Re)
 		a2=int(COL-5*Re)
@@ -165,15 +170,14 @@ def addGalaxyCatalog2(hdu, catalog):
 		#if i > 200: break
 	return
 
+# TODO
+def detectWithPsf(hdu,i,j,psf):
+	return hdu[j][i]
 
 
-# los prints que siguen son solo para tener una idea de que el codigo esta haciendo lo que se supone que haga
-#print len(h), len(pos_sources)
-#print detecciones2.shape
-#print detecciones2[2,0],detecciones[4096*2]
-#print len(RA),len(DEC)
-
-
-
-
-
+if debug:
+	# los prints que siguen son solo para tener una idea de que el codigo esta haciendo lo que se supone que haga
+	print len(h), len(pos_sources)
+	print detecciones2.shape
+	print detecciones2[2,0],detecciones[maxROW*2]
+	print len(RA),len(DEC)
