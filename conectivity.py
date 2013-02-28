@@ -1,18 +1,28 @@
 import random as r
 from math import sqrt
 
+if __file__:
+  debug = True
+else:
+  debug = False
+
 class Matrix:
-  def __init__(self, n, N, delta, search_key=1, no_search_key=0):
+  def __init__(self, n, N, delta, search_key=1, no_search_key=0, matrix= None):
     self.search_key = 1
     self.no_search_key = 0
     self.marker_key = '?'
+    self.star_marker = '*'
     self.delta = delta
     self.n = n
     self.N = N
     self.matrix = []
+    self.matrix_list = []
 
-    self.__init_matrix__()
-    self.connected_matrix = []
+    if matrix == None:
+      self.__init_matrix__()
+    else:
+      self.matrix = matrix[:] #copy matrix
+
 
   def __init_matrix__(self):
     for i in range(0,self.n):
@@ -22,6 +32,7 @@ class Matrix:
           row.append( self.search_key )
         else:
           row.append( self.no_search_key )
+        self.matrix_list.append([j,i])
       self.matrix.append(row)
 
   def __set_control_vars__(self, j, i):
@@ -69,9 +80,28 @@ class Matrix:
       return self.has_a_star( j, i) and self.valid_point( j, i) and self.r < self.delta and self.points <= self.N
 
   def connect(self):
+    # Randomized version
+    # l = self.matrix_list[:] #copy list
+    # while len(l) > 0:
+    #   index = r.randint(0,len(l)-1)
+    #   j = l[index][0]
+    #   i = l[index][1]
+    #   self.connect_point(j,i)
+    #   del(l[index])
+
+    # Lineal implementation version
     for j in range(0,self.n):
       for i in range(0,self.n):
         self.connect_point( j, i)
+
+    if not debug:
+      for j in range(0,self.n):
+        for i in range(0,self.n):
+          self.clean_marker( j, i)
+
+  def clean_marker(self,j,i):
+    if self.matrix[j][i] == self.star_marker:
+      self.matrix[j][i] = self.search_key
 
   def connect_point(self, j, i):
     if not self.has_a_star(j,i):
@@ -79,32 +109,22 @@ class Matrix:
 
     self.__set_control_vars__( j, i)
     self.connect_recursive( j, i)
-
-    # print("before unify")
-    # print("xcm :" + str(self.xcm))
-    # print("ycm :" + str(self.ycm))
-    # print("points :" + str(self.points))
-    # self.print_m()
-
     self.unify_points()
-
-    # print("after unify")
-    # print("xcm :" + str(self.xcm))
-    # print("ycm :" + str(self.ycm))
-    # print("points :" + str(self.points))
-    # self.print_m()
 
   def connect_recursive(self,j,i):
     if self.union( j, i):
 
-      dirs = []
+      # Randomized implementation
+      # dirs = []
+      # d = r.randint(0,3)
+      # dirs += [d]
+      # while len(dirs) < 4:
+      #   d = r.randint(0,3)
+      #   if not(d in dirs):
+      #     dirs += [d]
 
-      d = r.randint(0,3)
-      dirs += [d]
-      while len(dirs) < 4:
-        d = r.randint(0,3)
-        if not(d in dirs):
-          dirs += [d]
+      # Iterative implementation
+      dirs = [0,1,2,3]
 
       for d in dirs:
         if d == 0:
@@ -132,7 +152,6 @@ class Matrix:
 
       self.rx =  self.maxx - self.minx
       self.ry = self.maxy - self.miny
-
       self.r = sqrt(self.rx**2 + self.ry**2)
 
       self.matrix[cj][ci] = self.marker_key # mark the united point
@@ -155,16 +174,13 @@ class Matrix:
         ycm += y
         xcm += x
 
-      # print("calculated xcm: " + str(xcm))
-      # print("calculated ycm: " + str(ycm))
-
       xcm = int(round( xcm / self.points))
       ycm = int(round( ycm / self.points))
 
       self.xcm = xcm
       self.ycm = ycm
 
-      self.matrix[self.ycm][self.xcm] = '*'
+      self.matrix[self.ycm][self.xcm] = self.star_marker
 
   def print_m(self):
     p = ""
@@ -175,14 +191,15 @@ class Matrix:
     print(p)
 
 def run():
-  n = 20
+  n = 1000
   delta = 3
-  N = 5
+  N = 4
 
   matrix = Matrix( n = n, N = N, delta = delta)
 
-  matrix.print_m()
+  # matrix.print_m()
   matrix.connect()
-  matrix.print_m()
+  # matrix.print_m()
 
-run()
+if debug:
+  run()
