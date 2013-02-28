@@ -1,12 +1,14 @@
 import random as r
+from math import sqrt
 
 class Matrix:
-  def __init__(self, n, delta, search_key=1, no_search_key=0):
+  def __init__(self, n, N, delta, search_key=1, no_search_key=0):
     self.search_key = 1
     self.no_search_key = 0
     self.marker_key = '?'
     self.delta = delta
     self.n = n
+    self.N = N
     self.matrix = []
 
     self.__init_matrix__()
@@ -36,6 +38,7 @@ class Matrix:
     ###
     self.rx= 0
     self.ry= 0
+    self.r = 0
 
     self.points = 0
     self.union_points = []
@@ -48,11 +51,7 @@ class Matrix:
     if( self.matrix[j][i+1] == self.search_key or \
         self.matrix[j+1][i] == self.search_key or \
         self.matrix[j][i-1] == self.search_key or \
-        self.matrix[j-1][i] == self.search_key or \
-        self.matrix[j+1][i+1] == self.search_key or \
-        self.matrix[j+1][i-1] == self.search_key or \
-        self.matrix[j-1][i+1] == self.search_key or \
-        self.matrix[j-1][i-1] == self.search_key):
+        self.matrix[j-1][i] == self.search_key):
       return True
     else:
       return False
@@ -63,97 +62,109 @@ class Matrix:
     else:
       return False
 
-  def can_expand(self):
-    return self.ycm >= 0 and self.xcm >=0 and self.xcm < self.n and self.ycm < self.n and self.rx < self.delta and self.ry < self.delta
+  def can_expand(self, j = None, i = None):
+    if j == None or i == None:
+      return self.r < self.delta and self.points <= self.N
+    else:
+      return self.has_a_star( j, i) and self.valid_point( j, i) and self.r < self.delta and self.points <= self.N
 
   def connect(self):
-    for j in range(1,self.n-1):
-      for i in range(1,self.n-1):
+    for j in range(0,self.n):
+      for i in range(0,self.n):
         self.connect_point( j, i)
 
   def connect_point(self, j, i):
-    if self.matrix[j][i] == self.no_search_key:
+    if not self.has_a_star(j,i):
       return
 
     self.__set_control_vars__( j, i)
+    self.connect_recursive( j, i)
 
-    while self.more_stars( i = self.xcm , j = self.ycm ) and self.can_expand() and self.valid_point( self.xcm, self.ycm ) and not self.next_point:
-      print("xcm: " + str(self.xcm))
-      print("ycm: " + str(self.ycm))
-      print("valor:" + str(self.matrix[self.ycm][self.xcm]))
+    # print("before unify")
+    # print("xcm :" + str(self.xcm))
+    # print("ycm :" + str(self.ycm))
+    # print("points :" + str(self.points))
+    # self.print_m()
 
-      for dj in range(-1,2):
-        cj = self.ycm+dj
-        for di in range(-1,2):
-          ci = self.xcm+di
+    self.unify_points()
 
-          if self.can_expand():
-            if self.has_a_star( j = cj, i = ci):
-              self.union( cj, ci)
+    # print("after unify")
+    # print("xcm :" + str(self.xcm))
+    # print("ycm :" + str(self.ycm))
+    # print("points :" + str(self.points))
+    # self.print_m()
 
-      self.unify_points()
+  def connect_recursive(self,j,i):
+    if self.union( j, i):
 
-      self.matrix[j][i] = '*'
-      self.print_m()
+      dirs = []
+
+      d = r.randint(0,3)
+      dirs += [d]
+      while len(dirs) < 4:
+        d = r.randint(0,3)
+        if not(d in dirs):
+          dirs += [d]
+
+      for d in dirs:
+        if d == 0:
+          self.connect_recursive( j+1, i)
+        elif d == 1:
+          self.connect_recursive( j, i-1)
+        elif d == 2:
+          self.connect_recursive( j-1, i)
+        elif d == 3:
+          self.connect_recursive( j, i+1)
 
   def union(self, cj, ci):
-    self.points += 1
-    if ci < self.minx:
-      self.minx = ci
-    if ci > self.maxx:
-      self.maxx = ci
+    if self.can_expand( cj, ci):
+      self.points += 1
 
-    if cj < self.miny:
-      self.miny = cj
-    if cj > self.maxy:
-      self.maxy = cj
+      if ci < self.minx:
+        self.minx = ci
+      if ci > self.maxx:
+        self.maxx = ci
 
-    self.rx =  self.maxx - self.minx
-    self.ry = self.maxy - self.miny
+      if cj < self.miny:
+        self.miny = cj
+      if cj > self.maxy:
+        self.maxy = cj
 
-    self.matrix[cj][ci] = self.marker_key # delete the united point
-    self.union_points.append([cj,ci])
+      self.rx =  self.maxx - self.minx
+      self.ry = self.maxy - self.miny
+
+      self.r = sqrt(self.rx**2 + self.ry**2)
+
+      self.matrix[cj][ci] = self.marker_key # mark the united point
+      self.union_points.append([cj,ci])
+      return True
+    else:
+      return False
 
   def unify_points(self):
-    print("Unifying points")
+    if self.points > 0:
+      xcm = 0
+      ycm = 0
 
-    xcm = 0
-    ycm = 0
+      for point in self.union_points:
+        y = point[0]
+        x = point[1]
 
-    for point in self.union_points:
-      ycm += point[0] #y
-      xcm += point[1] #x
+        self.matrix[y][x] = self.no_search_key #delete the united point
 
-    xcm = int( (xcm - 1) / self.points)
-    ycm = int( (ycm -1) / self.points)
+        ycm += y
+        xcm += x
 
-    self.move_mass_center(new_ycm = ycm, new_xcm = xcm)
+      # print("calculated xcm: " + str(xcm))
+      # print("calculated ycm: " + str(ycm))
 
-  def move_mass_center(self, new_ycm, new_xcm):
-    dx = self.xcm - new_xcm
-    dy = self.ycm - new_ycm
+      xcm = int(round( xcm / self.points))
+      ycm = int(round( ycm / self.points))
 
-    if self.xcm == new_xcm and self.ycm == new_ycm:
-      self.next_point = True
-      print("xcm e ycm no vario en :" + str(new_xcm) + ", " + str(new_ycm))
+      self.xcm = xcm
+      self.ycm = ycm
 
-      # if self.ycm == new_ycm:
-      #   print("ycm no vario en :" + str(new_ycm))
-      # else:
-      #   print("cambiando ycm a:" + str(new_ycm))
-
-      self.xcm = new_xcm
-      self.ycm = new_ycm
-
-      ###
-      self.minx += dx
-      self.miny += dy
-      ###
-      self.maxx += dx
-      self.maxy += dy
-      ###
-
-    self.matrix[self.ycm][self.xcm] = self.search_key
+      self.matrix[self.ycm][self.xcm] = '*'
 
   def print_m(self):
     p = ""
@@ -164,9 +175,11 @@ class Matrix:
     print(p)
 
 def run():
-  n = 10
+  n = 20
   delta = 3
-  matrix = Matrix( n= n, delta= delta)
+  N = 5
+
+  matrix = Matrix( n = n, N = N, delta = delta)
 
   matrix.print_m()
   matrix.connect()
