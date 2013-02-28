@@ -11,8 +11,8 @@ class Matrix:
   def __init__(self, n, N, delta, search_key=1, no_search_key=0, matrix= None):
     self.search_key = 1
     self.no_search_key = 0
-    self.marker_key = '?'
-    self.star_marker = '*'
+    self.marker_key = -2.0
+    self.star_marker = -1.0
     self.delta = delta
     self.n = n
     self.N = N
