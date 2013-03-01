@@ -55,12 +55,12 @@ class Cummule:
 
       #sup part
       for dj in range(j,j+limit+1):
-        if self.matrix[di][dj] == self.search_key:
+        if self.matrix[di][dj] == self.search_key and self.valid_point(dj,di):
           d.add_neighbour(i=di,j=dj)
 
       #inf part
       for dj in range(j,j-limit-1):
-        if self.matrix[di][dj] == self.search_key:
+        if self.matrix[di][dj] == self.search_key and self.valid_point(dj,di):
           d.add_neighbour(i=di,j=dj)
 
     self.detects.append(d)
