@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt,pi
 from numpy import *
 
 if __file__:
@@ -12,6 +12,7 @@ class Detect:
     self.neighbours = []
 
     self.r = 0.0
+    self.area = 0.0
     self.delta = delta
 
   def add_neighbour(self,j,i):
@@ -21,6 +22,8 @@ class Detect:
     else:
       if not([j,i] in self.neighbours):
         self.neighbours.append([j,i])
+        self.r = r
+        self.area = pi*self.r**2/2
         return True
       else:
         return False
@@ -39,4 +42,6 @@ if debug:
   print(str(d.add_neighbour(j=0,i=1)) + str(": Should be True by no variance")) #should be True, no limits variance
   print(str(d.add_neighbour(j=4,i=4)) + str(": Should be False by exceed")) #should be False, area exceed limit
 
-  print(d.neighbours)
+  print("neighbours: " + str(d.neighbours))
+  print("area: " + str(d.area))
+  print("r: " + str(d.r))
