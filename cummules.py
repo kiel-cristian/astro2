@@ -78,7 +78,12 @@ class Cummule:
     detect.area
 
   def get_elements(self, x):
-    for i in range(1,x+1):
+    if len(self.detects) < x:
+      limit = len(self.detects)
+    else:
+      limit = x
+
+    for i in range(0,limit):
       self.detects[i].print_info()
 
   def valid_point(self,j,i):
@@ -107,6 +112,6 @@ if __name__ == '__main__':
   c = Cummule(n, ra, dec, delta, m2) #only for testing
 
   print("Printing elements")
-  c.get_elements()
+  c.get_elements(400)
 
 
