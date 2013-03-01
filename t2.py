@@ -8,11 +8,6 @@ from t2b import *
 from connectivity import *
 import voronoi2 as v2
 
-if __file__:
-	debug = True
-else:
-	debug = False
-
 hdulist = pf.open('newimage2.fits')
 h1= hdulist[0].data
 h2=h1.ravel()
@@ -42,10 +37,10 @@ def FindFDR(hdu,sigma_noise,fdr,N,psf):
 	for i in range(maxROW):
 		for j in range(maxCOL):
 			if M2[i][j] == 1 :
-				if matrizlista[i][j] == 1: 
+				if matrizlista[i][j] == 1:
 					reales +=1
 				else:
-					for k in range(psf):		
+					for k in range(psf):
 						for l in range(psf):
 							aux=0
 							if ((i-k) >=0 and (i+k) < maxROW and (j-l)>=0 and (j+l) < maxCOL):
@@ -64,7 +59,7 @@ def FindFDR(hdu,sigma_noise,fdr,N,psf):
 								if (j+l)>=maxCOL:
 									if  (matrizlista[i-k][j-l] == 1 ) or (matrizlista[i+k][j-l] == 1):
 										aux=1
-					if aux==1: 
+					if aux==1:
 						reales +=1
 	if debug:
 		print reales, len(pos_sources) - reales, (len(pos_sources) - reales)/float(len(pos_sources))
@@ -74,7 +69,7 @@ def FindFDR(hdu,sigma_noise,fdr,N,psf):
 
 v2.generate_voronoi_diagram(maxROW,maxCOL,len(ra),ra,dec)
 
-if debug:
+if __name__ == '__main__':
 	print len(ra),len(dec),detec.shape
 
 # aca falta agregar todo lo de la parte 2

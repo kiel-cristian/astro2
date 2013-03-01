@@ -6,11 +6,6 @@ import numpy as np
 from math import *
 from scipy import random
 
-if __file__:
-  debug = True
-else:
-  debug = False
-
 maxROW = 4096
 maxCOL = 4096
 
@@ -175,7 +170,7 @@ def detectWithPsf(hdu,i,j,psf):
 	return hdu[j][i]
 
 
-if debug:
+if __name__ == '__main__':
 	# los prints que siguen son solo para tener una idea de que el codigo esta haciendo lo que se supone que haga
 	print len(h), len(pos_sources)
 	print detecciones2.shape
