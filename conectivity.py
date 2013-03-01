@@ -157,8 +157,8 @@ class Matrix:
       if cj > self.maxy:
         self.maxy = cj
 
-      self.rx =  self.maxx - self.minx
-      self.ry = self.maxy - self.miny
+      self.rx =  (self.maxx - self.minx) + 1
+      self.ry = (self.maxy - self.miny) + 1
       self.r = sqrt(self.rx**2 + self.ry**2)/2
 
       self.matrix[cj][ci] = self.marker_key # mark the united point

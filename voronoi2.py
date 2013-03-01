@@ -13,7 +13,7 @@ def generate_voronoi_diagram(width, height, num_cells,ra,dec):
   ng = []
   nb = []
 
-  for i in range(num_cells):  
+  for i in range(num_cells):
     (r,c)=t2b.RADECtoRowCol(ra[i],dec[i])
     nx.append(r)
     ny.append(c)
@@ -23,7 +23,7 @@ def generate_voronoi_diagram(width, height, num_cells,ra,dec):
   print "hola"
   for y in range(imgy):
     print y
-    for x in range(imgx): 
+    for x in range(imgx):
       dmin = hypot(imgx-1, imgy-1)
       j = -1
       for i in range(num_cells):
