@@ -82,17 +82,19 @@ class Cummule:
       return True
 
 if __name__ == '__main__':
-  n = 40
+  n = 4096
   delta = 3
-  N = 4
+  N = 8
 
   m = Matrix( n = n, N = N, delta = delta)
-  m.print_m()
-  n.connect()
-  (ra,dec) = getRaDec(m)
 
-  c = Cummule(n, ra, dec, delta, matrix)
+  if n <= 100:
+    m.print_m()
 
+  m2 = m.connect()
+  (ra,dec) = getRaDec(m2)
+
+  c = Cummule(n, ra, dec, delta, m2) #only for testing
   c.get_elements()
 
 

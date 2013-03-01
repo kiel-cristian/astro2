@@ -95,7 +95,7 @@ class Matrix:
       for i in range(0,self.n):
         self.connect_point( j, i)
 
-    if not debug:
+    if not __name__ == '__main__':
       for j in range(0,self.n):
         for i in range(0,self.n):
           self.clean_marker( j, i)
