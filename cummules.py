@@ -3,7 +3,7 @@ from math import sqrt
 from numpy import *
 from detect import *
 from t2b import *
-from connectivity import *
+from conectivity import *
 
 #RADECtoRowCol
 
