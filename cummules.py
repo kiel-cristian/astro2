@@ -19,9 +19,15 @@ class Cummule:
     self.no_search_key = 0
     self.marker_key = -1
 
-    self.clear_assigned_cummules()
     self.mark_assigned_cummules()
     self.load_not_connected_elements()
+    self.clear_marks()
+
+  def clear_marks(self):
+    for i in range(0,self.n):
+      for j in range(0,self.n):
+        if self.matrix[i][j] == self.marker_key:
+          self.matrix[i][j] = self.search_key
 
   def mark_assigned_cummules(self):
     for i in range(0,len(self.ra)):
@@ -91,10 +97,16 @@ if __name__ == '__main__':
   if n <= 100:
     m.print_m()
 
+  print("Connecting matrix")
   m2 = m.connect()
+
+  print("Calculating Ra Dec")
   (ra,dec) = getRaDec(m2)
 
+  print("Initializing cummules")
   c = Cummule(n, ra, dec, delta, m2) #only for testing
+
+  print("Printing elements")
   c.get_elements()
 
 
