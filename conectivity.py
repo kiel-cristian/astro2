@@ -2,11 +2,6 @@ from random import randint
 from math import sqrt
 from numpy import *
 
-if __file__:
-  debug = True
-else:
-  debug = False
-
 class Matrix:
   def __init__(self, n, N, delta, search_key=1, no_search_key=0, matrix= None):
     self.search_key = 1
@@ -216,5 +211,5 @@ def run():
   matrix.connect()
   matrix.print_m()
 
-if debug:
+if __name__ == '__main__':
   run()
