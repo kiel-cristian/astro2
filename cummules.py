@@ -57,7 +57,7 @@ class Cummule:
 
     for di in range(i-self.delta,i+self.delta+1):
       #(y-j)**2 = r**2 - (x-i)**2
-      limit =  round(sqrt(self.delta**2 - (di -i)**2))
+      limit =  int(round(sqrt(self.delta**2 - (di -i)**2)))
 
       #sup part
       for dj in range(j,j+limit+1):
